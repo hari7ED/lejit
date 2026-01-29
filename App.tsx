@@ -20,6 +20,7 @@ const ScrollToTop = () => {
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -27,6 +28,11 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close menu when location changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -38,16 +44,17 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'glass-nav border-b border-slate-200 dark:border-slate-800 py-3 shadow-sm' : 'bg-transparent py-5'}`}>
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled || isMenuOpen ? 'glass-nav border-b border-slate-200 dark:border-slate-800 py-3 shadow-sm' : 'bg-transparent py-5'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/" className="flex items-center gap-2 group shrink-0">
             <div className="w-9 h-9 bg-primary-700 rounded-lg flex items-center justify-center text-white font-bold text-xl group-hover:scale-105 transition-transform">
               L
             </div>
             <span className="text-2xl font-display font-extrabold tracking-tight text-primary-900 dark:text-white">Lejit AI</span>
           </Link>
           
+          {/* Desktop Links */}
           <div className="hidden lg:flex items-center space-x-8">
             {navLinks.map((link) => (
               <Link 
@@ -67,9 +74,46 @@ const Navbar = () => {
             >
               Contact
             </Link>
-            <button className="bg-primary-700 hover:bg-primary-800 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg shadow-primary-700/20 active:scale-95">
+            <button className="hidden sm:block bg-primary-700 hover:bg-primary-800 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg shadow-primary-700/20 active:scale-95">
               Start free trial
             </button>
+            
+            {/* Mobile Menu Toggle Button */}
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors focus:outline-none"
+              aria-label="Toggle menu"
+            >
+              <span className="material-icons-round">
+                {isMenuOpen ? 'close' : 'menu'}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Menu Dropdown */}
+        <div className={`lg:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMenuOpen ? 'max-h-screen opacity-100 mt-4 pb-6' : 'max-h-0 opacity-0'}`}>
+          <div className="flex flex-col space-y-4">
+            {navLinks.map((link) => (
+              <Link 
+                key={link.name} 
+                to={link.path}
+                className={`text-lg font-bold px-4 py-2 rounded-xl transition-colors ${location.pathname === link.path ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+              >
+                {link.name}
+              </Link>
+            ))}
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col space-y-4">
+               <Link 
+                to="/contact" 
+                className="text-lg font-bold px-4 py-2 text-slate-600 dark:text-slate-300"
+              >
+                Contact
+              </Link>
+              <button className="w-full bg-primary-700 hover:bg-primary-800 text-white px-6 py-4 rounded-2xl font-bold transition-all shadow-lg shadow-primary-700/20">
+                Start free trial
+              </button>
+            </div>
           </div>
         </div>
       </div>
